@@ -1,106 +1,184 @@
--- Create the ScreenGui and parent it to PlayerGui
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "MainGui"
-screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+-- Create the initial ScreenGui and Loading Screen
+local player = game.Players.LocalPlayer
+local screenGui = Instance.new("ScreenGui", player.PlayerGui)
+screenGui.ResetOnSpawn = false -- Prevents the ScreenGui from resetting on player respawn
 
--- Create the loading frame
-local loadingFrame = Instance.new("Frame")
-loadingFrame.Size = UDim2.new(1, 0, 1, 0)
-loadingFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-loadingFrame.Parent = screenGui
+-- Create the loading screen
+local loadingScreen = Instance.new("Frame", screenGui)
+loadingScreen.Size = UDim2.new(1, 0, 1, 0)
+loadingScreen.Position = UDim2.new(0, 0, 0, 0)
+loadingScreen.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 
--- Create the loading text
-local loadingText = Instance.new("TextLabel")
-loadingText.Size = UDim2.new(1, 0, 1, 0)
-loadingText.Text = "Loading Executor"
-loadingText.TextColor3 = Color3.fromRGB(255, 255, 255)
-loadingText.TextScaled = true
-loadingText.BackgroundTransparency = 1
-loadingText.Parent = loadingFrame
+-- Create loading label on the loading screen
+local loadingLabel = Instance.new("TextLabel", loadingScreen)
+loadingLabel.Size = UDim2.new(0.3, 0, 0.1, 0)
+loadingLabel.Position = UDim2.new(0.35, 0, 0.45, 0)
+loadingLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+loadingLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+loadingLabel.Text = "Loading Executor"
+loadingLabel.TextScaled = true
+loadingLabel.TextStrokeTransparency = 0.5
 
--- Function to create the main GUI
-local function createMainGui()
-    -- Remove the loading screen
-    loadingFrame:Destroy()
+-- Create a toggle button
+local toggleButton = Instance.new("TextButton", screenGui)
+toggleButton.Size = UDim2.new(0.1, 0, 0.05, 0)
+toggleButton.Position = UDim2.new(0.45, 0, 0, 0) -- Top center
+toggleButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+toggleButton.Text = "A"
+toggleButton.TextScaled = true
+toggleButton.BorderSizePixel = 0
+toggleButton.AutoButtonColor = false -- Prevent color change on hover/click
+toggleButton.ClipsDescendants = true
+toggleButton.AnchorPoint = Vector2.new(0.5, 0) -- Centered horizontally
+toggleButton.ZIndex = 2
+toggleButton.Visible = true
+
+-- Make the toggle button rounded
+local uicorner = Instance.new("UICorner", toggleButton)
+uicorner.CornerRadius = UDim.new(0.5, 0)
+
+-- Function to create the main UI after shrinking the loading screen
+local mainUIVisible = false
+local mainUI
+
+local function createMainUI()
+    -- Shrink the loading screen
+    local tweenService = game:GetService("TweenService")
+    local shrinkTween = tweenService:Create(loadingScreen, TweenInfo.new(1), {Size = UDim2.new(0.4, 0, 0.4, 0), Position = UDim2.new(0.6, 0, 0, 0)})
+    shrinkTween:Play()
     
-    -- Create the main frame
-    local mainFrame = Instance.new("Frame")
-    mainFrame.Size = UDim2.new(0.4, 0, 0.4, 0)  -- Adjust size as needed
-    mainFrame.Position = UDim2.new(0.6, 0, 0.1, 0)  -- Position it in the top-right corner
-    mainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    mainFrame.Parent = screenGui
+    -- Wait for the shrink animation to finish
+    shrinkTween.Completed:Connect(function()
+        -- Remove the loading screen
+        loadingScreen:Destroy()
 
-    -- Create the title text
-    local titleText = Instance.new("TextLabel")
-    titleText.Size = UDim2.new(1, 0, 0.1, 0)
-    titleText.Position = UDim2.new(0, 0, 0, 0)
-    titleText.Text = "Adubi"
-    titleText.TextColor3 = Color3.fromRGB(255, 255, 255)
-    titleText.TextScaled = true
-    titleText.BackgroundTransparency = 1
-    titleText.Parent = mainFrame
+        -- Create the main UI elements
+        local border = Instance.new("Frame", screenGui)
+        mainUI = Instance.new("Frame", screenGui)
+        local titleLabel = Instance.new("TextLabel", mainUI)
+        local scriptBox = Instance.new("TextBox", mainUI)
+        local executeButton = Instance.new("TextButton", mainUI)
+        local infiniteButton = Instance.new("TextButton", mainUI)
 
-    -- Create the text box
-    local textBox = Instance.new("TextBox")
-    textBox.Size = UDim2.new(1, 0, 0.6, 0)
-    textBox.Position = UDim2.new(0, 0, 0.1, 0)
-    textBox.Text = ""
-    textBox.PlaceholderText = "Enter script here"
-    textBox.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    textBox.TextColor3 = Color3.fromRGB(0, 0, 0)
-    textBox.Parent = mainFrame
+        -- Set properties for the red border around the frame
+        border.Size = UDim2.new(0.4, 8, 0.4, 8)
+        border.Position = UDim2.new(0.6, -4, 0, -4)
+        border.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+        border.BorderSizePixel = 0
 
-    -- Create the execute button
-    local executeButton = Instance.new("TextButton")
-    executeButton.Size = UDim2.new(0.2, 0, 0.1, 0)
-    executeButton.Position = UDim2.new(0, 0, 0.7, 0)
-    executeButton.Text = "EXECUTE"
-    executeButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
-    executeButton.TextColor3 = Color3.fromRGB(0, 0, 0)
-    executeButton.Parent = mainFrame
+        -- Set properties for the main frame
+        mainUI.Size = UDim2.new(0.4, 0, 0.4, 0)
+        mainUI.Position = UDim2.new(0.6, 0, 0, 0)
+        mainUI.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+        mainUI.Visible = true
 
-    -- Function to execute script from textbox
-    executeButton.MouseButton1Click:Connect(function()
-        local scriptCode = textBox.Text
-        if scriptCode ~= "" then
-            local func, err = loadstring(scriptCode)
-            if func then
-                func()
-            else
-                warn("Failed to execute script: " .. err)
+        -- Set properties for title label
+        titleLabel.Size = UDim2.new(1, 0, 0.1, 0)
+        titleLabel.Position = UDim2.new(0, 0, 0, 0)
+        titleLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+        titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+        titleLabel.Text = "Adubi"
+        titleLabel.TextScaled = true
+        titleLabel.TextStrokeTransparency = 0.5
+
+        -- Set properties for script textbox
+        scriptBox.Size = UDim2.new(1, 0, 0.6, 0)
+        scriptBox.Position = UDim2.new(0, 0, 0.1, 0)
+        scriptBox.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        scriptBox.Text = ""
+
+        -- Set properties for execute button
+        executeButton.Size = UDim2.new(0.3, 0, 0.1, 0)
+        executeButton.Position = UDim2.new(0, 0, 0.8, 0)
+        executeButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+        executeButton.Text = "EXECUTE"
+        executeButton.TextScaled = true
+        executeButton.MouseButton1Click:Connect(function()
+            local scriptContent = scriptBox.Text
+            if scriptContent ~= "" then
+                local func, errorMessage = loadstring(scriptContent)
+                if func then
+                    local success, execError = pcall(func)
+                    if not success then
+                        warn("Script execution error: " .. execError)
+                    end
+                else
+                    warn("Failed to load script: " .. errorMessage)
+                end
             end
+        end)
+
+        -- Set properties for infinite button
+        infiniteButton.Size = UDim2.new(0.3, 0, 0.1, 0)
+        infiniteButton.Position = UDim2.new(0.7, 0, 0.8, 0)
+        infiniteButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+        infiniteButton.Text = "Infinite Field"
+        infiniteButton.TextScaled = true
+        infiniteButton.MouseButton1Click:Connect(function()
+            local scriptURL = "https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"
+            local scriptContent = "loadstring(game:HttpGet('" .. scriptURL .. "'))()"
+            local func, errorMessage = loadstring(scriptContent)
+            if func then
+                local success, execError = pcall(func)
+                if not success then
+                    warn("Script execution error: " .. execError)
+                end
+            else
+                warn("Failed to load script: " .. errorMessage)
+            end
+        end)
+
+        -- Frame dragging functionality
+        local dragging = false
+        local dragInput, dragStart, startPos
+
+        local function updateInput(input)
+            local delta = input.Position - dragStart
+            mainUI.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+            border.Position = mainUI.Position - UDim2.new(0, 4, 0, 4)
         end
-    end)
 
-    -- Create the close button
-    local closeButton = Instance.new("TextButton")
-    closeButton.Size = UDim2.new(0.1, 0, 0.1, 0)
-    closeButton.Position = UDim2.new(0.9, 0, 0, 0)
-    closeButton.Text = "X"
-    closeButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-    closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    closeButton.Parent = mainFrame
+        mainUI.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                dragging = true
+                dragStart = input.Position
+                startPos = mainUI.Position
+                input.Changed:Connect(function()
+                    if input.UserInputState == Enum.UserInputState.End then
+                        dragging = false
+                    end
+                end)
+            end
+        end)
 
-    -- Function to close the GUI
-    closeButton.MouseButton1Click:Connect(function()
-        screenGui:Destroy()
-    end)
+        mainUI.InputChanged:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseMovement then
+                dragInput = input
+            end
+        end)
 
-    -- Create the "Infinite Field" button
-    local infiniteButton = Instance.new("TextButton")
-    infiniteButton.Size = UDim2.new(0.2, 0, 0.1, 0)
-    infiniteButton.Position = UDim2.new(0.8, 0, 0.7, 0)
-    infiniteButton.Text = "Infinite Field"
-    infiniteButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
-    infiniteButton.TextColor3 = Color3.fromRGB(0, 0, 0)
-    infiniteButton.Parent = mainFrame
+        game:GetService("UserInputService").InputChanged:Connect(function(input)
+            if dragging and input == dragInput then
+                updateInput(input)
+            end
+        end)
 
-    -- Function to load Infinite Yield script
-    infiniteButton.MouseButton1Click:Connect(function()
-        loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()
+        -- Toggle visibility with button
+        toggleButton.MouseButton1Click:Connect(function()
+            mainUI.Visible = not mainUI.Visible
+            border.Visible = mainUI.Visible
+        end)
     end)
 end
 
--- Create the GUI after 5 seconds
+-- Delay the creation of the main UI by 5 seconds, then shrink and load
 wait(5)
-createMainGui() 
+createMainUI()
+
+-- Button protection - Prevent the toggle button from being deleted
+toggleButton.AncestryChanged:Connect(function()
+    if not toggleButton:IsDescendantOf(game) then
+        toggleButton.Parent = screenGui
+    end
+end)
