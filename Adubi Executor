@@ -1,0 +1,106 @@
+-- Create the ScreenGui and parent it to PlayerGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "MainGui"
+screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+-- Create the loading frame
+local loadingFrame = Instance.new("Frame")
+loadingFrame.Size = UDim2.new(1, 0, 1, 0)
+loadingFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+loadingFrame.Parent = screenGui
+
+-- Create the loading text
+local loadingText = Instance.new("TextLabel")
+loadingText.Size = UDim2.new(1, 0, 1, 0)
+loadingText.Text = "Loading Executor"
+loadingText.TextColor3 = Color3.fromRGB(255, 255, 255)
+loadingText.TextScaled = true
+loadingText.BackgroundTransparency = 1
+loadingText.Parent = loadingFrame
+
+-- Function to create the main GUI
+local function createMainGui()
+    -- Remove the loading screen
+    loadingFrame:Destroy()
+    
+    -- Create the main frame
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Size = UDim2.new(0.4, 0, 0.4, 0)  -- Adjust size as needed
+    mainFrame.Position = UDim2.new(0.6, 0, 0.1, 0)  -- Position it in the top-right corner
+    mainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    mainFrame.Parent = screenGui
+
+    -- Create the title text
+    local titleText = Instance.new("TextLabel")
+    titleText.Size = UDim2.new(1, 0, 0.1, 0)
+    titleText.Position = UDim2.new(0, 0, 0, 0)
+    titleText.Text = "Adubi"
+    titleText.TextColor3 = Color3.fromRGB(255, 255, 255)
+    titleText.TextScaled = true
+    titleText.BackgroundTransparency = 1
+    titleText.Parent = mainFrame
+
+    -- Create the text box
+    local textBox = Instance.new("TextBox")
+    textBox.Size = UDim2.new(1, 0, 0.6, 0)
+    textBox.Position = UDim2.new(0, 0, 0.1, 0)
+    textBox.Text = ""
+    textBox.PlaceholderText = "Enter script here"
+    textBox.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    textBox.TextColor3 = Color3.fromRGB(0, 0, 0)
+    textBox.Parent = mainFrame
+
+    -- Create the execute button
+    local executeButton = Instance.new("TextButton")
+    executeButton.Size = UDim2.new(0.2, 0, 0.1, 0)
+    executeButton.Position = UDim2.new(0, 0, 0.7, 0)
+    executeButton.Text = "EXECUTE"
+    executeButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+    executeButton.TextColor3 = Color3.fromRGB(0, 0, 0)
+    executeButton.Parent = mainFrame
+
+    -- Function to execute script from textbox
+    executeButton.MouseButton1Click:Connect(function()
+        local scriptCode = textBox.Text
+        if scriptCode ~= "" then
+            local func, err = loadstring(scriptCode)
+            if func then
+                func()
+            else
+                warn("Failed to execute script: " .. err)
+            end
+        end
+    end)
+
+    -- Create the close button
+    local closeButton = Instance.new("TextButton")
+    closeButton.Size = UDim2.new(0.1, 0, 0.1, 0)
+    closeButton.Position = UDim2.new(0.9, 0, 0, 0)
+    closeButton.Text = "X"
+    closeButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    closeButton.Parent = mainFrame
+
+    -- Function to close the GUI
+    closeButton.MouseButton1Click:Connect(function()
+        screenGui:Destroy()
+    end)
+
+    -- Create the "Infinite Field" button
+    local infiniteButton = Instance.new("TextButton")
+    infiniteButton.Size = UDim2.new(0.2, 0, 0.1, 0)
+    infiniteButton.Position = UDim2.new(0.8, 0, 0.7, 0)
+    infiniteButton.Text = "Infinite Field"
+    infiniteButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+    infiniteButton.TextColor3 = Color3.fromRGB(0, 0, 0)
+    infiniteButton.Parent = mainFrame
+
+    -- Function to load Infinite Yield script
+    infiniteButton.MouseButton1Click:Connect(function()
+        loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()
+    end)
+end
+
+-- Create the GUI after 5 seconds
+wait(5)
+createMainGui() 
